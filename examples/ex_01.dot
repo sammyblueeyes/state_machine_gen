@@ -1,0 +1,103 @@
+digraph BreadMachine {
+    // *** States ***
+    STATE_off[shape=octagon];
+    STATE_ready[shape=octagon];
+    STATE_ready_delay_start[shape=octagon];
+    STATE_wait_delayed_start[shape=octagon];
+    STATE_mixing[shape=octagon];
+    STATE_first_proof[shape=octagon];
+    STATE_knock_down[shape=octagon];
+    STATE_second_proof[shape=octagon];
+    STATE_baking[shape=octagon];
+    STATE_keep_warm[shape=octagon];
+    STATE_error[shape=octagon];
+
+    // *** Transitions ***
+    // In order for the state machine to be complete, all EVENTS need to be 
+    // handled by every STATE - even if this is a no-op:
+    //    EVENT_ON_OFF_PRESSED
+    //    EVENT_START_PRESSED
+    //    EVENT_INCREMENT_DELAY_PRESSED
+    //    EVENT_DECREMENT_DELAY_PRESSED
+    //    EVENT_TIMEOUT
+    STATE_off -> turning_on[label="EVENT_ON_OFF_PRESSED"]
+        turning_on -> STATE_error[label="SYM_ERROR"]
+        turning_on -> STATE_ready[label="SYM_OK"]
+    STATE_off -> STATE_off[label="EVENT_START_PRESSED"]
+    STATE_off -> STATE_off[label="EVENT_INCREMENT_DELAY_PRESSED"]
+    STATE_off -> STATE_off[label="EVENT_DECREMENT_DELAY_PRESSED"]
+    STATE_off -> STATE_off[label="EVENT_TIMEOUT"]
+
+    STATE_error -> turning_off[label="EVENT_ON_OFF_PRESSED"]
+        turning_off -> STATE_off[label="SYM_OK"]
+    STATE_error -> STATE_error[label="EVENT_START_PRESSED"]
+    STATE_error -> STATE_error[label="EVENT_INCREMENT_DELAY_PRESSED"]
+    STATE_error -> STATE_error[label="EVENT_DECREMENT_DELAY_PRESSED"]
+    STATE_error -> STATE_error[label="EVENT_TIMEOUT"]
+
+    STATE_ready -> handle_inc_delay[label="EVENT_INCREMENT_DELAY_PRESSED"]
+        handle_inc_delay -> STATE_ready[label="EVENT_READY"]
+        handle_inc_delay -> STATE_ready_delay_start[label="EVENT_READY_DELAY_START"]
+    STATE_ready -> handle_dec_delay[label="EVENT_DECREMENT_DELAY_PRESSED"]
+        handle_dec_delay -> STATE_ready[label="EVENT_READY"]
+        handle_dec_delay -> STATE_ready_delay_start[label="EVENT_READY_DELAY_START"]
+    STATE_ready -> start_mixing[label="EVENT_START_PRESSED"]
+    STATE_ready -> STATE_ready[label="EVENT_ON_OFF_PRESSED"]
+    STATE_ready -> STATE_ready[label="EVENT_TIMEOUT"]
+
+    STATE_ready_delay_start -> handle_inc_delay[label="EVENT_INCREMENT_DELAY_PRESSED"]
+    STATE_ready_delay_start -> handle_dec_delay[label="EVENT_DECREMENT_DELAY_PRESSED"]
+    STATE_ready_delay_start -> start_with_delay[label="EVENT_START_PRESSED"]
+        start_with_delay -> STATE_wait_delayed_start[label="SYM_OK"]
+    STATE_ready_delay_start -> STATE_ready_delay_start[label="EVENT_ON_OFF_PRESSED"]
+    STATE_ready_delay_start -> STATE_ready_delay_start[label="EVENT_TIMEOUT"]
+
+    STATE_wait_delayed_start -> start_mixing[label="EVENT_TIMEOUT"]
+        start_mixing -> STATE_error[label="SYM_ERROR"]
+        start_mixing -> STATE_mixing[label="SYM_OK"]
+    STATE_wait_delayed_start -> STATE_wait_delayed_start[label="EVENT_ON_OFF_PRESSED"]
+    STATE_wait_delayed_start -> STATE_wait_delayed_start[label="EVENT_START_PRESSED"]
+    STATE_wait_delayed_start -> STATE_wait_delayed_start[label="EVENT_INCREMENT_DELAY_PRESSED"]
+    STATE_wait_delayed_start -> STATE_wait_delayed_start[label="EVENT_DECREMENT_DELAY_PRESSED"]
+
+    STATE_mixing -> start_first_proof[label="EVENT_TIMEOUT"]
+        start_first_proof -> STATE_first_proof[label="SYM_OK"]
+    STATE_mixing -> STATE_mixing[label="EVENT_ON_OFF_PRESSED"]
+    STATE_mixing -> STATE_mixing[label="EVENT_START_PRESSED"]
+    STATE_mixing -> STATE_mixing[label="EVENT_INCREMENT_DELAY_PRESSED"]
+    STATE_mixing -> STATE_mixing[label="EVENT_DECREMENT_DELAY_PRESSED"]
+
+    STATE_first_proof -> start_knock_down[label="EVENT_TIMEOUT"]
+        start_knock_down -> STATE_knock_down[label="SYM_OK"]
+    STATE_first_proof -> STATE_first_proof[label="EVENT_ON_OFF_PRESSED"]
+    STATE_first_proof -> STATE_first_proof[label="EVENT_START_PRESSED"]
+    STATE_first_proof -> STATE_first_proof[label="EVENT_INCREMENT_DELAY_PRESSED"]
+    STATE_first_proof -> STATE_first_proof[label="EVENT_DECREMENT_DELAY_PRESSED"]
+
+    STATE_knock_down -> start_second_proof[label="EVENT_TIMEOUT"]
+        start_second_proof -> STATE_second_proof[label="EVENT_TIMEOUT"]
+    STATE_knock_down -> STATE_knock_down[label="EVENT_ON_OFF_PRESSED"]
+    STATE_knock_down -> STATE_knock_down[label="EVENT_START_PRESSED"]
+    STATE_knock_down -> STATE_knock_down[label="EVENT_INCREMENT_DELAY_PRESSED"]
+    STATE_knock_down -> STATE_knock_down[label="EVENT_DECREMENT_DELAY_PRESSED"]
+
+    STATE_second_proof -> start_bake[label="EVENT_TIMEOUT"]
+        start_bake -> STATE_baking[label="SYM_OK"]
+    STATE_second_proof -> STATE_second_proof[label="EVENT_ON_OFF_PRESSED"]
+    STATE_second_proof -> STATE_second_proof[label="EVENT_START_PRESSED"]
+    STATE_second_proof -> STATE_second_proof[label="EVENT_INCREMENT_DELAY_PRESSED"]
+    STATE_second_proof -> STATE_second_proof[label="EVENT_DECREMENT_DELAY_PRESSED"]
+
+    STATE_baking -> start_keep_warm[label="EVENT_TIMEOUT"]
+        start_keep_warm -> STATE_keep_warm[label="SYM_OK"]
+    STATE_baking -> STATE_baking[label="EVENT_ON_OFF_PRESSED"]
+    STATE_baking -> STATE_baking[label="EVENT_START_PRESSED"]
+    STATE_baking -> STATE_baking[label="EVENT_INCREMENT_DELAY_PRESSED"]
+    STATE_baking -> STATE_baking[label="EVENT_DECREMENT_DELAY_PRESSED"]
+
+    STATE_keep_warm -> turning_off[label="EVENT_TIMEOUT"]
+    STATE_keep_warm -> STATE_keep_warm[label="EVENT_ON_OFF_PRESSED"]
+    STATE_keep_warm -> STATE_keep_warm[label="EVENT_START_PRESSED"]
+    STATE_keep_warm -> STATE_keep_warm[label="EVENT_INCREMENT_DELAY_PRESSED"]
+    STATE_keep_warm -> STATE_keep_warm[label="EVENT_DECREMENT_DELAY_PRESSED"]
+}
