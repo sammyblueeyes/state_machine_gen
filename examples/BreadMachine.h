@@ -1,309 +1,129 @@
-#include <string>
-#include <queue>
+#include "BreadMachineStateMachine.h"
+#include <iostream>
 
-class BreadMachineStateMachine {
-    protected:
-        enum turning_on_ret {
-            turning_on_ret_SYM_ERROR,
-            turning_on_ret_SYM_OK,
-        };
-        virtual turning_on_ret turning_on() = 0;
-
-        enum turning_off_ret {
-            turning_off_ret_SYM_OK,
-        };
-        virtual turning_off_ret turning_off() = 0;
-
-        enum handle_inc_delay_ret {
-            handle_inc_delay_ret_SYM_READY,
-            handle_inc_delay_ret_SYM_READY_DELAY_START,
-        };
-        virtual handle_inc_delay_ret handle_inc_delay() = 0;
-
-        enum handle_dec_delay_ret {
-            handle_dec_delay_ret_SYM_READY,
-            handle_dec_delay_ret_SYM_READY_DELAY_START,
-        };
-        virtual handle_dec_delay_ret handle_dec_delay() = 0;
-
-        enum start_mixing_ret {
-            start_mixing_ret_SYM_ERROR,
-            start_mixing_ret_SYM_OK,
-        };
-        virtual start_mixing_ret start_mixing() = 0;
-
-        enum start_with_delay_ret {
-            start_with_delay_ret_SYM_OK,
-        };
-        virtual start_with_delay_ret start_with_delay() = 0;
-
-        enum start_first_proof_ret {
-            start_first_proof_ret_SYM_OK,
-        };
-        virtual start_first_proof_ret start_first_proof() = 0;
-
-        enum start_knock_down_ret {
-            start_knock_down_ret_SYM_OK,
-        };
-        virtual start_knock_down_ret start_knock_down() = 0;
-
-        enum start_second_proof_ret {
-            start_second_proof_ret_SYM_OK,
-        };
-        virtual start_second_proof_ret start_second_proof() = 0;
-
-        enum start_bake_ret {
-            start_bake_ret_SYM_OK,
-        };
-        virtual start_bake_ret start_bake() = 0;
-
-        enum start_keep_warm_ret {
-            start_keep_warm_ret_SYM_OK,
-        };
-        virtual start_keep_warm_ret start_keep_warm() = 0;
-
+class BreadMachine: public BreadMachineStateMachine {
     public:
-        enum State {
-            STATE_off,
-            STATE_ready,
-            STATE_ready_delay_start,
-            STATE_wait_delayed_start,
-            STATE_mixing,
-            STATE_first_proof,
-            STATE_knock_down,
-            STATE_second_proof,
-            STATE_baking,
-            STATE_keep_warm,
-            STATE_error,
-        };
-
-        enum Event {
-            EVENT_ON_OFF_PRESSED,
-            EVENT_START_PRESSED,
-            EVENT_INCREMENT_DELAY_PRESSED,
-            EVENT_DECREMENT_DELAY_PRESSED,
-            EVENT_TIMEOUT,
-        };
-
-        const std::string state_str() const {
-            switch (cur_state) {
-                case STATE_off:
-                    return "STATE_off";
-                case STATE_ready:
-                    return "STATE_ready";
-                case STATE_ready_delay_start:
-                    return "STATE_ready_delay_start";
-                case STATE_wait_delayed_start:
-                    return "STATE_wait_delayed_start";
-                case STATE_mixing:
-                    return "STATE_mixing";
-                case STATE_first_proof:
-                    return "STATE_first_proof";
-                case STATE_knock_down:
-                    return "STATE_knock_down";
-                case STATE_second_proof:
-                    return "STATE_second_proof";
-                case STATE_baking:
-                    return "STATE_baking";
-                case STATE_keep_warm:
-                    return "STATE_keep_warm";
-                case STATE_error:
-                    return "STATE_error";
-            };
-            return "";
-        }
-
-        void tickMachine(Event event);
+        void press_on_off_button();
+        void press_start_button();
+        void press_inc_delay_button();
+        void press_dec_delay_button();
 
     private:
-        State cur_state = STATE_off;
-        std::queue<Event> next_event;
-        void kickMachine();
+        void tick_and_print(BreadMachine::Event event);
+
+        virtual turning_on_ret turning_on();
+        virtual turning_off_ret turning_off();
+        virtual handle_inc_delay_ret handle_inc_delay();
+        virtual handle_dec_delay_ret handle_dec_delay();
+        virtual start_mixing_ret start_mixing();
+        virtual start_with_delay_ret start_with_delay();
+        virtual start_first_proof_ret start_first_proof();
+        virtual start_knock_down_ret start_knock_down();
+        virtual start_second_proof_ret start_second_proof();
+        virtual start_bake_ret start_bake();
+        virtual start_keep_warm_ret start_keep_warm();
 };
 
-void BreadMachineStateMachine::tickMachine(Event event)
+
+std::ostream& operator<<(std::ostream& os, const BreadMachine& bread_machine)
 {
-    // Using the queue allows tickMachine to be re-entrant.
-    // TODO To make tickMachine thread safe, we'll also need locking
-    if (next_event.empty()) {
-        // We're not currenting executing kickMachine
-        next_event.push(event);
-        kickMachine(); 
-        return;
-    }
-    // Already procesing events, so just queue the next one
-    next_event.push(event);
+    os << "Current state: " << bread_machine.state_str() << "\n";
+    return os;
 }
 
 
-void BreadMachineStateMachine::kickMachine() 
+void BreadMachine::press_on_off_button()
 {
-    while (!next_event.empty()) {
-        Event event = next_event.front();
-        next_event.pop();
-        switch (cur_state) {
-            case STATE_off:
-                switch(event) {
-                    case EVENT_ON_OFF_PRESSED:
-                        switch(turning_on()) {
-                            case turning_on_ret_SYM_ERROR:
-                                cur_state = STATE_error;
-                                break;
-                            case turning_on_ret_SYM_OK:
-                                cur_state = STATE_ready;
-                                break;
-                        };
-                        break;
-                    case EVENT_START_PRESSED:
-                        break;
-                    case EVENT_INCREMENT_DELAY_PRESSED:
-                        break;
-                    case EVENT_DECREMENT_DELAY_PRESSED:
-                        break;
-                    case EVENT_TIMEOUT:
-                        break;
-                };
-                break;
-            case STATE_ready:
-                switch(event) {
-                    case EVENT_ON_OFF_PRESSED:
-                        break;
-                    case EVENT_START_PRESSED:
-                        break;
-                    case EVENT_INCREMENT_DELAY_PRESSED:
-                        break;
-                    case EVENT_DECREMENT_DELAY_PRESSED:
-                        break;
-                    case EVENT_TIMEOUT:
-                        break;
-                };
-                break;
-            case STATE_ready_delay_start:
-                switch(event) {
-                    case EVENT_ON_OFF_PRESSED:
-                        break;
-                    case EVENT_START_PRESSED:
-                        break;
-                    case EVENT_INCREMENT_DELAY_PRESSED:
-                        break;
-                    case EVENT_DECREMENT_DELAY_PRESSED:
-                        break;
-                    case EVENT_TIMEOUT:
-                        break;
-                };
-                break;
-            case STATE_wait_delayed_start:
-                switch(event) {
-                    case EVENT_ON_OFF_PRESSED:
-                        break;
-                    case EVENT_START_PRESSED:
-                        break;
-                    case EVENT_INCREMENT_DELAY_PRESSED:
-                        break;
-                    case EVENT_DECREMENT_DELAY_PRESSED:
-                        break;
-                    case EVENT_TIMEOUT:
-                        break;
-                };
-                break;
-            case STATE_mixing:
-                switch(event) {
-                    case EVENT_ON_OFF_PRESSED:
-                        break;
-                    case EVENT_START_PRESSED:
-                        break;
-                    case EVENT_INCREMENT_DELAY_PRESSED:
-                        break;
-                    case EVENT_DECREMENT_DELAY_PRESSED:
-                        break;
-                    case EVENT_TIMEOUT:
-                        break;
-                };
-                break;
-            case STATE_first_proof:
-                switch(event) {
-                    case EVENT_ON_OFF_PRESSED:
-                        break;
-                    case EVENT_START_PRESSED:
-                        break;
-                    case EVENT_INCREMENT_DELAY_PRESSED:
-                        break;
-                    case EVENT_DECREMENT_DELAY_PRESSED:
-                        break;
-                    case EVENT_TIMEOUT:
-                        break;
-                };
-                break;
-            case STATE_knock_down:
-                switch(event) {
-                    case EVENT_ON_OFF_PRESSED:
-                        break;
-                    case EVENT_START_PRESSED:
-                        break;
-                    case EVENT_INCREMENT_DELAY_PRESSED:
-                        break;
-                    case EVENT_DECREMENT_DELAY_PRESSED:
-                        break;
-                    case EVENT_TIMEOUT:
-                        break;
-                };
-                break;
-            case STATE_second_proof:
-                switch(event) {
-                    case EVENT_ON_OFF_PRESSED:
-                        break;
-                    case EVENT_START_PRESSED:
-                        break;
-                    case EVENT_INCREMENT_DELAY_PRESSED:
-                        break;
-                    case EVENT_DECREMENT_DELAY_PRESSED:
-                        break;
-                    case EVENT_TIMEOUT:
-                        break;
-                };
-                break;
-            case STATE_baking:
-                switch(event) {
-                    case EVENT_ON_OFF_PRESSED:
-                        break;
-                    case EVENT_START_PRESSED:
-                        break;
-                    case EVENT_INCREMENT_DELAY_PRESSED:
-                        break;
-                    case EVENT_DECREMENT_DELAY_PRESSED:
-                        break;
-                    case EVENT_TIMEOUT:
-                        break;
-                };
-                break;
-            case STATE_keep_warm:
-                switch(event) {
-                    case EVENT_ON_OFF_PRESSED:
-                        break;
-                    case EVENT_START_PRESSED:
-                        break;
-                    case EVENT_INCREMENT_DELAY_PRESSED:
-                        break;
-                    case EVENT_DECREMENT_DELAY_PRESSED:
-                        break;
-                    case EVENT_TIMEOUT:
-                        break;
-                };
-                break;
-            case STATE_error:
-                switch(event) {
-                    case EVENT_ON_OFF_PRESSED:
-                        break;
-                    case EVENT_START_PRESSED:
-                        break;
-                    case EVENT_INCREMENT_DELAY_PRESSED:
-                        break;
-                    case EVENT_DECREMENT_DELAY_PRESSED:
-                        break;
-                    case EVENT_TIMEOUT:
-                        break;
-                };
-                break;
-        };
-    }
+    std::cout << "*** Press ON/OFF Button ***\n";
+    tick_and_print(BreadMachine::EVENT_ON_OFF_PRESSED);
+}
+
+void BreadMachine::press_start_button()
+{
+    std::cout << "*** Press START Button ***\n";
+    tick_and_print(BreadMachine::EVENT_START_PRESSED);
+}
+
+void BreadMachine::press_inc_delay_button()
+{
+    std::cout << "*** Press INCREMENT DELAY Button ***\n";
+    tick_and_print(BreadMachine::EVENT_INCREMENT_DELAY_PRESSED);
+}
+
+void BreadMachine::press_dec_delay_button()
+{
+    std::cout << "*** Press DECREMENT DELAY Button ***\n";
+    tick_and_print(BreadMachine::EVENT_DECREMENT_DELAY_PRESSED);
+}
+
+void BreadMachine::tick_and_print(BreadMachine::Event event)
+{
+    tickMachine(event);
+    std::cout << (*this);
+}
+
+BreadMachine::turning_on_ret BreadMachine::turning_on() {
+    std::cout << "    turning_on\n";
+    // TODO
+    return turning_on_ret_SYM_OK;
+}
+
+BreadMachine::turning_off_ret BreadMachine::turning_off() {
+    std::cout << "    turning_off\n";
+    // TODO
+    return turning_off_ret_SYM_OK;
+}
+
+BreadMachine::handle_inc_delay_ret BreadMachine::handle_inc_delay() {
+    std::cout << "    handle_inc_delay\n";
+    // TODO
+    return handle_inc_delay_ret_SYM_READY_DELAY_START;
+}
+
+BreadMachine::handle_dec_delay_ret BreadMachine::handle_dec_delay() {
+    std::cout << "    handle_dec_delay\n";
+    // TODO
+    return handle_dec_delay_ret_SYM_READY_DELAY_START;
+}
+
+BreadMachine::start_mixing_ret BreadMachine::start_mixing() {
+    std::cout << "    start_mixing\n";
+    // TODO
+    return start_mixing_ret_SYM_OK;
+}
+
+BreadMachine::start_with_delay_ret BreadMachine::start_with_delay() {
+    std::cout << "    start_with_delay\n";
+    // TODO
+    return start_with_delay_ret_SYM_OK;
+}
+
+BreadMachine::start_first_proof_ret BreadMachine::start_first_proof() {
+    std::cout << "    start_first_proof\n";
+    // TODO
+    return start_first_proof_ret_SYM_OK;
+}
+
+BreadMachine::start_knock_down_ret BreadMachine::start_knock_down() {
+    std::cout << "    start_knock_down\n";
+    // TODO
+    return start_knock_down_ret_SYM_OK;
+}
+
+BreadMachine::start_second_proof_ret BreadMachine::start_second_proof() {
+    std::cout << "    start_second_proof\n";
+    // TODO
+    return start_second_proof_ret_SYM_OK;
+}
+
+BreadMachine::start_bake_ret BreadMachine::start_bake() {
+    std::cout << "    start_bake\n";
+    // TODO
+    return start_bake_ret_SYM_OK;
+}
+
+BreadMachine::start_keep_warm_ret BreadMachine::start_keep_warm() {
+    std::cout << "    start_keep_warm\n";
+    // TODO
+    return start_keep_warm_ret_SYM_OK;
 }
