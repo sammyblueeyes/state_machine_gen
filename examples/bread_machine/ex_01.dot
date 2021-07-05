@@ -42,14 +42,14 @@ digraph BreadMachine {
         handle_dec_delay -> STATE_ready[label="SYM_READY"]
         handle_dec_delay -> STATE_ready_delay_start[label="SYM_READY_DELAY_START"]
     STATE_ready -> start_mixing[label="EVENT_START_PRESSED"]
-    STATE_ready -> STATE_ready[label="EVENT_ON_OFF_PRESSED"]
+    STATE_ready -> turning_off[label="EVENT_ON_OFF_PRESSED"]
     STATE_ready -> STATE_ready[label="EVENT_TIMEOUT"]
 
     STATE_ready_delay_start -> handle_inc_delay[label="EVENT_INCREMENT_DELAY_PRESSED"]
     STATE_ready_delay_start -> handle_dec_delay[label="EVENT_DECREMENT_DELAY_PRESSED"]
     STATE_ready_delay_start -> start_with_delay[label="EVENT_START_PRESSED"]
         start_with_delay -> STATE_wait_delayed_start[label="SYM_OK"]
-    STATE_ready_delay_start -> STATE_ready_delay_start[label="EVENT_ON_OFF_PRESSED"]
+    STATE_ready_delay_start -> turning_off[label="EVENT_ON_OFF_PRESSED"]
     STATE_ready_delay_start -> STATE_ready_delay_start[label="EVENT_TIMEOUT"]
 
     STATE_wait_delayed_start -> start_mixing[label="EVENT_TIMEOUT"]

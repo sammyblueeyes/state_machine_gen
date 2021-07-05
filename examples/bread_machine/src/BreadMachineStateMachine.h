@@ -23,7 +23,6 @@ class BreadMachineStateMachine {
         virtual turning_off_ret turning_off() = 0;
 
         enum handle_inc_delay_ret {
-            handle_inc_delay_ret_SYM_READY,
             handle_inc_delay_ret_SYM_READY_DELAY_START,
         };
         virtual handle_inc_delay_ret handle_inc_delay() = 0;
@@ -197,14 +196,16 @@ void BreadMachineStateMachine::kickMachine()
             case STATE_ready:
                 switch(event) {
                     case EVENT_ON_OFF_PRESSED:
+                        switch (turning_off()) {
+                            case turning_off_ret_SYM_OK:
+                                next_state = STATE_off;
+                                break;
+                        };
                         break;
                     case EVENT_START_PRESSED:
                         break;
                     case EVENT_INCREMENT_DELAY_PRESSED:
                         switch(handle_inc_delay()) {
-                            case handle_inc_delay_ret_SYM_READY:
-                                next_state = STATE_ready;
-                                break;
                             case handle_inc_delay_ret_SYM_READY_DELAY_START:
                                 next_state = STATE_ready_delay_start;
                                 break;
@@ -227,6 +228,11 @@ void BreadMachineStateMachine::kickMachine()
             case STATE_ready_delay_start:
                 switch(event) {
                     case EVENT_ON_OFF_PRESSED:
+                        switch (turning_off()) {
+                            case turning_off_ret_SYM_OK:
+                                next_state = STATE_off;
+                                break;
+                        };
                         break;
                     case EVENT_START_PRESSED:
                         switch (start_with_delay()) {
@@ -236,8 +242,21 @@ void BreadMachineStateMachine::kickMachine()
                         };
                         break;
                     case EVENT_INCREMENT_DELAY_PRESSED:
+                        switch(handle_inc_delay()) {
+                            case handle_inc_delay_ret_SYM_READY_DELAY_START:
+                                next_state = STATE_ready_delay_start;
+                                break;
+                        }
                         break;
                     case EVENT_DECREMENT_DELAY_PRESSED:
+                        switch(handle_dec_delay()) {
+                            case handle_dec_delay_ret_SYM_READY:
+                                next_state = STATE_ready;
+                                break;
+                            case handle_dec_delay_ret_SYM_READY_DELAY_START:
+                                next_state = STATE_ready_delay_start;
+                                break;
+                        }
                         break;
                     case EVENT_TIMEOUT:
                         break;
@@ -375,7 +394,7 @@ void BreadMachineStateMachine::kickMachine()
                         // In my previous work this was done using the same state enum
                         switch (turning_off()) {
                             case turning_off_ret_SYM_OK:
-                                next_state = STATE_keep_warm;
+                                next_state = STATE_off;
                                 break;
                         };
                         break;
@@ -387,7 +406,7 @@ void BreadMachineStateMachine::kickMachine()
                         // TODO: Duplicated from STATE_keep_warm
                         switch (turning_off()) {
                             case turning_off_ret_SYM_OK:
-                                next_state = STATE_keep_warm;
+                                next_state = STATE_off;
                                 break;
                         };
                         break;

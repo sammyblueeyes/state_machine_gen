@@ -9,6 +9,9 @@ class BreadMachine: public BreadMachineStateMachine {
         void press_dec_delay_button();
 
     private:
+        unsigned int delay = 0;
+        const unsigned int MAX_DELAY = 5;
+
         void tick_and_print(BreadMachine::Event event);
 
         virtual turning_on_ret turning_on();
@@ -76,13 +79,22 @@ BreadMachine::turning_off_ret BreadMachine::turning_off() {
 
 BreadMachine::handle_inc_delay_ret BreadMachine::handle_inc_delay() {
     std::cout << "    handle_inc_delay\n";
-    // TODO
+    if (delay < MAX_DELAY) {
+        delay += 1;
+    }
+    std::cout << "    delay = " << delay << "\n";
     return handle_inc_delay_ret_SYM_READY_DELAY_START;
 }
 
 BreadMachine::handle_dec_delay_ret BreadMachine::handle_dec_delay() {
     std::cout << "    handle_dec_delay\n";
-    // TODO
+    if (delay > 0) {
+        delay -= 1;
+    }
+    std::cout << "    delay = " << delay << "\n";
+    if (delay == 0) {
+        return handle_dec_delay_ret_SYM_READY;
+    }
     return handle_dec_delay_ret_SYM_READY_DELAY_START;
 }
 
