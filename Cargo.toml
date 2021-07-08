@@ -2,6 +2,7 @@
 name = "state_machine_gen"
 version = "0.1.0"
 edition = "2018"
+build = "build.rs" # LALRPOP preprocessing
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -9,4 +10,8 @@ edition = "2018"
 clap = { version = "2.33.3" }
 enum-utils = { version = "0.1.2" }
 structopt = { version = "0.3" }
+lalrpop-util = "0.19.6"
+regex = "1"
 
+[build-dependencies]
+lalrpop = "0.19.6"
