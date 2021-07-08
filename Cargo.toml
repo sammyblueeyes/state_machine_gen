@@ -6,5 +6,7 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+clap = { version = "2.33.3" }
+enum-utils = { version = "0.1.2" }
 structopt = { version = "0.3" }
 
