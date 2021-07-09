@@ -1,0 +1,27 @@
+use crate::ast::{Digraph, State};
+
+grammar;
+
+pub Digraph: Box<Digraph> = {
+    r"digraph\s+" <name:Name> r"\s*\{\s*" 
+            <states:StateDeclarationList> 
+            r"\s*\}\s*" => Box::new(Digraph{<>})
+};
+
+
+StateDeclarationList: Vec<State> = {
+    StateDeclaration+ => <>
+};
+
+StateDeclaration: State = {
+    <name:StateName> "[shape=octagon];" => State{<>}
+};
+
+StateName: String = {
+    // FIXME "STATE_" <name:Name> => <>
+    <name:Name> => <>
+}
+
+Name: String = {
+    r"[a-zA-Z0-9][a-zA-Z0-9_]*" => String::from(<>)
+};
